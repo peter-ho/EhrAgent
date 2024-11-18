@@ -6,6 +6,7 @@ import argparse
 import autogen
 from toolset_high import *
 from medagent import MedAgent
+from pathlib import Path
 from config import openai_config, llm_config_list
 import time
 
@@ -67,10 +68,13 @@ def main():
     llm_config = llm_config_list(args.seed, config_list)
 
     chatbot = autogen.agentchat.AssistantAgent(
-        name="chatbot",
+        name="gpt-35-turbo",
         system_message="For coding tasks, only use the functions you have been provided with. Reply TERMINATE when the task is done. Save the answers to the questions in the variable 'answer'. Please only generate the code.",
         llm_config=llm_config,
     )
+    #response = chatbot.send(message="this is a test, why am i getting 404 when doing receive on this chatbot?", recipient=chatbot, 
+    #                        silent=False, request_reply=True)
+    #print(response)
 
     user_proxy = MedAgent(
         name="user_proxy",
@@ -99,6 +103,9 @@ def main():
     import random
     random.shuffle(contents)
     file_path = "{}/{}/".format(args.logs_path, args.num_shots) + "{id}.txt"
+    log_dir = os.path.join(args.logs_path, str(args.num_shots))
+    Path(log_dir).mkdir(parents=True, exist_ok=True)
+    file_path = os.path.join(log_dir, "{id}.txt")
 
     start_time = time.time()
     if args.num_questions == -1:

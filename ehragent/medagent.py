@@ -50,7 +50,7 @@ class MedAgent(UserProxyAgent):
         # Returns the related information to the given query.
         patience = 2
         sleep_time = 30
-        openai.api_type = config["api_type"]
+        #openai.api_type = config["api_type"]
         openai.api_base = config["base_url"]
         openai.api_version = config["api_version"]
         openai.api_key = config["api_key"]
@@ -149,7 +149,7 @@ class MedAgent(UserProxyAgent):
         # Returns the related information to the given query.
         patience = 2
         sleep_time = 30
-        openai.api_type = config["api_type"]
+        #openai.api_type = config["api_type"]
         openai.api_base = config["base_url"]
         openai.api_version = config["api_version"]
         openai.api_key = config["api_key"]

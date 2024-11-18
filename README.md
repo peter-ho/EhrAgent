@@ -35,6 +35,8 @@ python main.py --llm YOUR_LLM_NAME --dataset mimic_iii --data_path YOUR_DATA_PAT
 We also support debugging mode to focus on a single question:
 ```bash
 python main.py --llm YOUR_LLM_NAME --dataset mimic_iii --data_path YOUR_DATA_PATH --logs_path YOUR_LOGS_PATH --debug --debug_id QUESTION_ID_TO_DEBUG
+
+python main.py --llm gpt-35-turbo --dataset mimic_iii --data_path S:\Work\ehrsql-ehragent\mimic_iii\valid_preprocessed.json --logs_path C:\src\EhrAgent\logs --debug --debug_id 0d92a1f6eab9515735f242f4 --num_questions -1
 ```
 
 For **eICU** dataset, just change the option of dataset to ``--dataset eicu``.

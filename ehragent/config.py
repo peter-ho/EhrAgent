@@ -1,20 +1,22 @@
 def openai_config(model):
     if model == '<YOUR_OWN_GPT_MODEL_I>':
         config = {
-            "model": "<MODEL_NAME>",
+            "model": "davinci-002",
             "api_key": "<API_KEY>",
             "base_url": "<BASE_URL>",
-            "api_version": "<API_VERSION>",
-            "api_type": "AZURE"
+            "api_version": "1",
         }
-    elif model == '<YOUR_OWN_GPT_MODEL_II>':
+    elif model == 'gpt-35-turbo':
         config = {
-            "model": "<MODEL_NAME>",
+            "model": "gpt-35-turbo",
             "api_key": "<API_KEY>",
             "base_url": "<BASE_URL>",
-            "api_version": "<API_VERSION>",
-            "api_type": "AZURE"
-        }    
+            "api_version": "2024-08-01-preview",
+        }
+    else:
+        config = {
+            "test": "openai/deployments/gpt-35-turbo/chat/completions"
+        }
     return config
 
 def llm_config_list(seed, config_list):
