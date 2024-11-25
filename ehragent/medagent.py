@@ -5,7 +5,7 @@ import asyncio
 import openai
 import json
 from openai import OpenAI, AzureOpenAI
-from autogen.agentchat import Agent, UserProxyAgent, ConversableAgent
+from autogen.agentchat import Agent, UserProxyAgent, ConversableAgent ## https://microsoft.github.io/autogen/0.2/docs/reference/agentchat/conversable_agent/
 from termcolor import colored
 import Levenshtein
 
@@ -114,7 +114,7 @@ class MedAgent(UserProxyAgent):
         return init_message
     
     def send(self, message: Union[Dict, str], recipient: Agent, request_reply: Optional[bool]=None, silent: Optional[bool]=False):
-        valid = self._append_oai_message(message, "assistant", recipient)
+        valid = self._append_oai_message(message, "assistant", recipient, True)
         if valid:
             recipient.receive(message, self, request_reply, silent)
         else:

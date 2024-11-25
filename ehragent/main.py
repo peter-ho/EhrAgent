@@ -9,8 +9,10 @@ from medagent import MedAgent
 from pathlib import Path
 from config import openai_config, llm_config_list
 import time
+import re
 
 def judge(pred, ans):
+    pred0, ans0 = pred, ans
     old_flag = True
     if not ans in pred:
         old_flag = False
@@ -39,7 +41,9 @@ def judge(pred, ans):
         if not ans[i] in pred:
             new_flag = False
             break
-    return (old_flag or new_flag)
+    result = (old_flag or new_flag)
+    print(f'JUDGING {pred0} vs {ans0} == {result}')
+    return result
 
 def set_seed(seed):
     random.seed(seed)
@@ -47,14 +51,15 @@ def set_seed(seed):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--llm", type=str, default="<YOUR_LLM_NAME>")
+    parser.add_argument("--llm_azure", type=str, default="<YOUR_LLM_NAME>")
+    parser.add_argument("--llm_autogen", type=str, default="<YOUR_LLM_NAME>")
     parser.add_argument("--num_questions", type=int, default=1)
     parser.add_argument("--dataset", type=str, default="mimic_iii")
     parser.add_argument("--data_path", type=str, default="<YOUR_DATASET_PATH>")
     parser.add_argument("--logs_path", type=str, default="<YOUR_LOGS_PATH>")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--debug", action="store_true")
-    parser.add_argument("--debug_id", type=str, default="521fd2885f51641a963f8d3e")
+    parser.add_argument("--debug_id", type=str, default="")
     parser.add_argument("--start_id", type=int, default=0)
     parser.add_argument("--num_shots", type=int, default=4)
     args = parser.parse_args()
@@ -64,11 +69,13 @@ def main():
     else:
         from prompts_eicu import EHRAgent_4Shots_Knowledge
 
-    config_list = [openai_config(args.llm)]
-    llm_config = llm_config_list(args.seed, config_list)
+    config_autogen = [openai_config(args.llm_autogen)]
+    config_azure = [openai_config(args.llm_azure)]
+    llm_config = llm_config_list(args.seed, config_autogen)
 
+    #    name="gpt-35-turbo",
     chatbot = autogen.agentchat.AssistantAgent(
-        name="gpt-35-turbo",
+        name=args.llm_autogen,
         system_message="For coding tasks, only use the functions you have been provided with. Reply TERMINATE when the task is done. Save the answers to the questions in the variable 'answer'. Please only generate the code.",
         llm_config=llm_config,
     )
@@ -81,16 +88,24 @@ def main():
         is_termination_msg=lambda x: x.get("content", "") and x.get("content", "").rstrip().endswith("TERMINATE"),
         human_input_mode="NEVER",
         max_consecutive_auto_reply=10,
-        code_execution_config={"work_dir": "coding"},
-        config_list=config_list,
+        code_execution_config={"work_dir": "coding", "use_docker": False},
+        config_list=config_azure,
     )
 
     # register the functions
     user_proxy.register_function(
         function_map={
-            "python": run_code
+            "python": run_code,
         }
     )
+    #        "Calculate": run_code,
+    #        "LoadDB": run_code,
+    #        "FilterDB": run_code,
+    #        "GetValue": run_code,
+    #        "SQLInterpreter": run_code,
+    #        "Calendar": run_code
+    #    }
+    #)
 
     user_proxy.register_dataset(args.dataset)
 
@@ -102,8 +117,8 @@ def main():
     # random shuffle
     import random
     random.shuffle(contents)
-    file_path = "{}/{}/".format(args.logs_path, args.num_shots) + "{id}.txt"
-    log_dir = os.path.join(args.logs_path, str(args.num_shots))
+    #file_path = "{}/{}/".format(args.logs_path, args.num_shots) + "{id}.txt"
+    log_dir = os.path.join(args.logs_path, f"{args.llm_azure}.{args.llm_autogen}", str(args.num_shots))
     Path(log_dir).mkdir(parents=True, exist_ok=True)
     file_path = os.path.join(log_dir, "{id}.txt")
 
@@ -123,8 +138,9 @@ def main():
         new_item = {"question": question, "knowledge": knowledge, "code": code}
         long_term_memory.append(new_item)
 
+    cnt_completion, cnt_judge, cnt_total = 0, 0, 0
     for i in range(args.start_id, args.num_questions):
-        if args.debug and contents[i]['id'] != args.debug_id:
+        if not args.debug_id is None and len(args.debug_id) > 0 and contents[i]['id'] != args.debug_id:
             continue
         question = contents[i]['template']
         answer = contents[i]['answer']
@@ -151,7 +167,8 @@ def main():
                             logs_string.append(argums)
         except Exception as e:
             logs_string = [str(e)]
-        print(logs_string)
+        if args.debug:
+            print(logs_string)
         file_directory = file_path.format(id=contents[i]['id'])
         # f = open(file_directory, 'w')
         if type(answer) == list:
@@ -167,13 +184,21 @@ def main():
         else:
             last_code_end = logs_string.rfind('Solution:')
         prediction_end = logs_string.rfind('TERMINATE')
-        prediction = logs_string[last_code_end:prediction_end]
+        match = re.search(r'\n-+\n(.*?)\n-+\nTERMINATE\n', logs_string)
+        prediction = match.group(1) if match else None
+        if prediction is None:
+            prediction = ''
+        else:
+            cnt_completion += 1
         result = judge(prediction, answer)
         if result:
             new_item = {"question": question, "knowledge": user_proxy.knowledge, "code": user_proxy.code}
             long_term_memory.append(new_item)
+            cnt_judge += 1
+        cnt_total += 1
     end_time = time.time()
     print("Time elapsed: ", end_time - start_time)
+    print(f"SR: {cnt_judge/cnt_total*100.0}\t CR: {cnt_completion/cnt_total*100.0}")
 
 if __name__ == "__main__":
     main()

@@ -1,0 +1,5 @@
+ehragent/__pycache__/*.pyc
+tools/__pycache__/*.pyc
+logs/
+.cache/42/cache.db
+ehragent/.cache/42/cache.db

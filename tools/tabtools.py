@@ -3,26 +3,29 @@ import jsonlines
 import json
 import re
 import sqlite3
+import mariadb
 import sys
+import os
 import Levenshtein
 def db_loader(target_ehr):
-    ehr_dict = {"admissions":"<YOUR_DATASET_PATH>/ehrsql/mimic_iii/ADMISSIONS.csv",
-                "chartevents":"<YOUR_DATASET_PATH>/ehrsql/mimic_iii/CHARTEVENTS.csv",
-                "cost":"<YOUR_DATASET_PATH>/ehrsql/mimic_iii/COST.csv",
-                "d_icd_diagnoses":"<YOUR_DATASET_PATH>/ehrsql/mimic_iii/D_ICD_DIAGNOSES.csv",
-                "d_icd_procedures":"<YOUR_DATASET_PATH>/ehrsql/mimic_iii/D_ICD_PROCEDURES.csv",
-                "d_items":"<YOUR_DATASET_PATH>/ehrsql/mimic_iii/D_ITEMS.csv",
-                "d_labitems":"<YOUR_DATASET_PATH>/ehrsql/mimic_iii/D_LABITEMS.csv",
-                "diagnoses_icd":"<YOUR_DATASET_PATH>/ehrsql/mimic_iii/DIAGNOSES_ICD.csv",
-                "icustays":"<YOUR_DATASET_PATH>/ehrsql/mimic_iii/ICUSTAYS.csv",
-                "inputevents_cv":"<YOUR_DATASET_PATH>/ehrsql/mimic_iii/INPUTEVENTS_CV.csv",
-                "labevents":"<YOUR_DATASET_PATH>/ehrsql/mimic_iii/LABEVENTS.csv",
-                "microbiologyevents":"<YOUR_DATASET_PATH>/ehrsql/mimic_iii/MICROBIOLOGYEVENTS.csv",
-                "outputevents":"<YOUR_DATASET_PATH>/mimic_iii/OUTPUTEVENTS.csv",
-                "patients":"<YOUR_DATASET_PATH>/ehrsql/mimic_iii/PATIENTS.csv",
-                "prescriptions":"<YOUR_DATASET_PATH>/ehrsql/mimic_iii/PRESCRIPTIONS.csv",
-                "procedures_icd":"<YOUR_DATASET_PATH>/ehrsql/mimic_iii/PROCEDURES_ICD.csv",
-                "transfers":"<YOUR_DATASET_PATH>/ehrsql/mimic_iii/TRANSFERS.csv",
+    ehr_csv_base_path = "S:\\Work\\mimic-iii-clinical-database-1.4"
+    ehr_dict = {"admissions":os.path.join(ehr_csv_base_path,"ADMISSIONS.csv.gz"),
+                "chartevents":os.path.join(ehr_csv_base_path,"CHARTEVENTS.csv.gz"),
+                "cost":os.path.join(ehr_csv_base_path,"COST.csv.gz"),
+                "d_icd_diagnoses":os.path.join(ehr_csv_base_path,"D_ICD_DIAGNOSES.csv.gz"),
+                "d_icd_procedures":os.path.join(ehr_csv_base_path,"D_ICD_PROCEDURES.csv.gz"),
+                "d_items":os.path.join(ehr_csv_base_path,"D_ITEMS.csv.gz"),
+                "d_labitems":os.path.join(ehr_csv_base_path,"D_LABITEMS.csv.gz"),
+                "diagnoses_icd":os.path.join(ehr_csv_base_path,"DIAGNOSES_ICD.csv.gz"),
+                "icustays":os.path.join(ehr_csv_base_path,"ICUSTAYS.csv.gz"),
+                "inputevents_cv":os.path.join(ehr_csv_base_path,"INPUTEVENTS_CV.csv.gz"),
+                "labevents":os.path.join(ehr_csv_base_path,"LABEVENTS.csv.gz"),
+                "microbiologyevents":os.path.join(ehr_csv_base_path,"MICROBIOLOGYEVENTS.csv.gz"),
+                "outputevents":os.path.join(ehr_csv_base_path,"OUTPUTEVENTS.csv.gz"),
+                "patients":os.path.join(ehr_csv_base_path,"PATIENTS.csv.gz"),
+                "prescriptions":os.path.join(ehr_csv_base_path,"PRESCRIPTIONS.csv.gz"),
+                "procedures_icd":os.path.join(ehr_csv_base_path,"PROCEDURES_ICD.csv.gz"),
+                "transfers":os.path.join(ehr_csv_base_path,"TRANSFERS.csv.gz"),
                 }
     data = pd.read_csv(ehr_dict[target_ehr])
     # data = data.astype(str)
@@ -190,12 +193,31 @@ def get_value(data, argument):
         raise Exception("The column name {} is incorrect. Please check the column name and make necessary changes. The columns in this table include {}.".format(column, column_values))
 
 def sql_interpreter(command):
+    try:
+        con = mariadb.connect(user='root', host='127.0.0.1', port=3306, database='mimiciiiv14')
+        cur = con.cursor()
+        cur.execute(command)
+        return cur.fetchall()
+    finally:
+        con.close()
+
+def date_calculator(argument):
+    try:
+        con = mariadb.connect(user='root', host='127.0.0.1', port=3306, database='mimiciiiv14')
+        cur = con.cursor()
+        command = "SELECT DATE_ADD(CURRENT_TIMESTAMP, INTERVAL {})".format(argument)
+        cur.execute(command)
+        return cur.fetchall()[0][0]
+    except:
+        raise Exception("The date calculator {} is incorrect. Please check the syntax and make necessary changes. For the current date and time, please call Calendar('0 year').".format(argument))
+
+def sql_interpreter_sqlite(command):
     con = sqlite3.connect("<YOUR_DATASET_PATH>/ehrsql/mimic_iii/mimic_iii.db")
     cur = con.cursor()
     results = cur.execute(command).fetchall()
     return results
 
-def date_calculator(argument):
+def date_calculator_sqlite(argument):
     try:
         con = sqlite3.connect("<YOUR_DATASET_PATH>/ehrsql/mimic_iii/mimic_iii.db")
         cur = con.cursor()

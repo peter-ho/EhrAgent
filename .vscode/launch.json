@@ -6,11 +6,30 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
+            //"module": "ehragent.main",
             "console": "integratedTerminal",
-            "args": ["--llm", "gpt-35-turbo", "--dataset", "mimic_iii", "--data_path", 
-            "S:\\Work\\ehrsql-ehragent\\mimic_iii\\valid_preprocessed.json", 
-            "--logs_path", "C:\\src\\EhrAgent\\logs", "--debug", "--debug_id", "0d92a1f6eab9515735f242f4",
-            "--num_questions", "-1"
+            "env": {
+                "PYTHONPATH": "${env:PYTHONPATH};${workspaceFolder}"
+            },
+            //"cwd1": "C:\\src\\EhrAgent",
+            //"cwd": "${workspaceFolder}",
+            //"gpt-35-turbo_azure",
+            "args": [
+                "--llm_autogen",
+                "gpt-4-0613",
+                "--llm_azure",
+                "gpt-4-0613",
+                "--dataset",
+                "mimic_iii",
+                "--data_path",
+                "S:\\Work\\ehrsql-ehragent\\mimic_iii\\valid_preprocessed.json",
+                "--logs_path",
+                "C:\\src\\EhrAgent\\logs",
+                "--debug",
+                "--debug_id",
+                "228a176ead6a30e7d7ea4a7b",
+                "--num_questions",
+                "-1"
             ]
         }
     ]

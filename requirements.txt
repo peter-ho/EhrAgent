@@ -11,3 +11,4 @@ seaborn==0.13.1
 termcolor==2.4.0
 wolframalpha==5.0.0
 flaml[automl]
+mariadb==1.1.11
