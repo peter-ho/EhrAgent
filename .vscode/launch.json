@@ -14,6 +14,7 @@
             //"cwd1": "C:\\src\\EhrAgent",
             //"cwd": "${workspaceFolder}",
             //"gpt-35-turbo_azure",
+            //                "S:\\Work\\ehrsql-ehragent\\mimic_iii\\valid_preprocessed_exclude_cost.json",
             "args": [
                 "--llm_autogen",
                 "gpt-4-0613",
@@ -22,12 +23,12 @@
                 "--dataset",
                 "mimic_iii",
                 "--data_path",
-                "S:\\Work\\ehrsql-ehragent\\mimic_iii\\valid_preprocessed.json",
+                "C:\\src\\EhrAgent\\data\\valid_preprocessed_exclude_cost.json",
                 "--logs_path",
                 "C:\\src\\EhrAgent\\logs",
                 "--debug",
                 "--debug_id",
-                "228a176ead6a30e7d7ea4a7b",
+                "1f739d651d3e475012d6dd7c",
                 "--num_questions",
                 "-1"
             ]

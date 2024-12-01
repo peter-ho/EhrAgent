@@ -8,24 +8,24 @@ import sys
 import os
 import Levenshtein
 def db_loader(target_ehr):
-    ehr_csv_base_path = "S:\\Work\\mimic-iii-clinical-database-1.4"
-    ehr_dict = {"admissions":os.path.join(ehr_csv_base_path,"ADMISSIONS.csv.gz"),
+    ehr_csv_base_path = "C:\\Data\\mimic-iii-clinical-database-1.4"
+    ehr_dict = {"admissions":os.path.join(ehr_csv_base_path,"ADMISSIONS.csv"),
                 "chartevents":os.path.join(ehr_csv_base_path,"CHARTEVENTS.csv.gz"),
                 "cost":os.path.join(ehr_csv_base_path,"COST.csv.gz"),
-                "d_icd_diagnoses":os.path.join(ehr_csv_base_path,"D_ICD_DIAGNOSES.csv.gz"),
-                "d_icd_procedures":os.path.join(ehr_csv_base_path,"D_ICD_PROCEDURES.csv.gz"),
-                "d_items":os.path.join(ehr_csv_base_path,"D_ITEMS.csv.gz"),
-                "d_labitems":os.path.join(ehr_csv_base_path,"D_LABITEMS.csv.gz"),
+                "d_icd_diagnoses":os.path.join(ehr_csv_base_path,"D_ICD_DIAGNOSES.csv"),
+                "d_icd_procedures":os.path.join(ehr_csv_base_path,"D_ICD_PROCEDURES.csv"),
+                "d_items":os.path.join(ehr_csv_base_path,"D_ITEMS.csv"),
+                "d_labitems":os.path.join(ehr_csv_base_path,"D_LABITEMS.csv"),
                 "diagnoses_icd":os.path.join(ehr_csv_base_path,"DIAGNOSES_ICD.csv.gz"),
-                "icustays":os.path.join(ehr_csv_base_path,"ICUSTAYS.csv.gz"),
-                "inputevents_cv":os.path.join(ehr_csv_base_path,"INPUTEVENTS_CV.csv.gz"),
-                "labevents":os.path.join(ehr_csv_base_path,"LABEVENTS.csv.gz"),
-                "microbiologyevents":os.path.join(ehr_csv_base_path,"MICROBIOLOGYEVENTS.csv.gz"),
-                "outputevents":os.path.join(ehr_csv_base_path,"OUTPUTEVENTS.csv.gz"),
-                "patients":os.path.join(ehr_csv_base_path,"PATIENTS.csv.gz"),
-                "prescriptions":os.path.join(ehr_csv_base_path,"PRESCRIPTIONS.csv.gz"),
-                "procedures_icd":os.path.join(ehr_csv_base_path,"PROCEDURES_ICD.csv.gz"),
-                "transfers":os.path.join(ehr_csv_base_path,"TRANSFERS.csv.gz"),
+                "icustays":os.path.join(ehr_csv_base_path,"ICUSTAYS.csv"),
+                "inputevents_cv":os.path.join(ehr_csv_base_path,"INPUTEVENTS_CV.csv"),
+                "labevents":os.path.join(ehr_csv_base_path,"LABEVENTS.csv"),
+                "microbiologyevents":os.path.join(ehr_csv_base_path,"MICROBIOLOGYEVENTS.csv"),
+                "outputevents":os.path.join(ehr_csv_base_path,"OUTPUTEVENTS.csv"),
+                "patients":os.path.join(ehr_csv_base_path,"PATIENTS.csv"),
+                "prescriptions":os.path.join(ehr_csv_base_path,"PRESCRIPTIONS.csv"),
+                "procedures_icd":os.path.join(ehr_csv_base_path,"PROCEDURES_ICD.csv"),
+                "transfers":os.path.join(ehr_csv_base_path,"TRANSFERS.csv"),
                 }
     data = pd.read_csv(ehr_dict[target_ehr])
     # data = data.astype(str)
@@ -192,7 +192,7 @@ def get_value(data, argument):
         column_values = ', '.join(data.columns.tolist())
         raise Exception("The column name {} is incorrect. Please check the column name and make necessary changes. The columns in this table include {}.".format(column, column_values))
 
-def sql_interpreter(command):
+def sql_interpreter_mariadb(command):
     try:
         con = mariadb.connect(user='root', host='127.0.0.1', port=3306, database='mimiciiiv14')
         cur = con.cursor()
@@ -201,7 +201,7 @@ def sql_interpreter(command):
     finally:
         con.close()
 
-def date_calculator(argument):
+def date_calculator_mariadb(argument):
     try:
         con = mariadb.connect(user='root', host='127.0.0.1', port=3306, database='mimiciiiv14')
         cur = con.cursor()
@@ -211,15 +211,16 @@ def date_calculator(argument):
     except:
         raise Exception("The date calculator {} is incorrect. Please check the syntax and make necessary changes. For the current date and time, please call Calendar('0 year').".format(argument))
 
+SQLITE3_MIMIC_III_PATH = "C:\\src\\mimic_iii_v1.4.sqlite"
 def sql_interpreter_sqlite(command):
-    con = sqlite3.connect("<YOUR_DATASET_PATH>/ehrsql/mimic_iii/mimic_iii.db")
+    con = sqlite3.connect(SQLITE3_MIMIC_III_PATH)
     cur = con.cursor()
     results = cur.execute(command).fetchall()
     return results
 
 def date_calculator_sqlite(argument):
     try:
-        con = sqlite3.connect("<YOUR_DATASET_PATH>/ehrsql/mimic_iii/mimic_iii.db")
+        con = sqlite3.connect(SQLITE3_MIMIC_III_PATH)
         cur = con.cursor()
         command = "select datetime(current_time, '{}')".format(argument)
         results = cur.execute(command).fetchall()[0][0]
@@ -227,17 +228,20 @@ def date_calculator_sqlite(argument):
         raise Exception("The date calculator {} is incorrect. Please check the syntax and make necessary changes. For the current date and time, please call Calendar('0 year').".format(argument))
     return results
 
+sql_interpreter = sql_interpreter_sqlite
+date_calculator = date_calculator_sqlite
+
 if __name__ == "__main__":
-    db = table_toolkits()
-    print(db.db_loader("microbiologyevents"))
+    #db = table_toolkits()
+    print(date_calculator('-1 year'))
+    print(db_loader("microbiologyevents"))
     # print(db.data_filter("SPEC_TYPE_DESC=peripheral blood lymphocytes"))
-    print(db.data_filter("HADM_ID=107655"))
-    print(db.data_filter("SPEC_TYPE_DESC=peripheral blood lymphocytes"))
-    print(db.get_value('CHARTTIME'))
-    # results = db.sql_interpreter("select max(t1.c1) from ( select sum(cost.cost) as c1 from cost where cost.hadm_id in ( select diagnoses_icd.hadm_id from diagnoses_icd where diagnoses_icd.icd9_code = ( select d_icd_diagnoses.icd9_code from d_icd_diagnoses where d_icd_diagnoses.short_title = 'comp-oth vasc dev/graft' ) ) and datetime(cost.chargetime) >= datetime(current_time,'-1 year') group by cost.hadm_id ) as t1")
+    print(data_filter("HADM_ID=107655"))
+    print(data_filter("SPEC_TYPE_DESC=peripheral blood lymphocytes"))
+    print(get_value('CHARTTIME'))
+    # results = db.sql_interpreter("select max(t1.c1) from ( select sum(cost.cost) as c1 from cost where cost.hadm_id in ( select diagnoses_icd.hadm_id from diagnoses_icd where diagnoses_icd.icd9_code = ( select d_icd_diagnoses.icd9_code from d_icd_diagnoses where d_icd_diagnoses.short_title = 'comp-oth vasc dev/graft' ) ) and datetime(cost.chargetime) >= datetime(current_time,'-1 year') group by#.hadm_id ) as t1")
     # results = [result[0] for result in results]
     # if len(results) == 1:
     #     print(results[0])
     # else:
     #     print(results)
-    # print(db.date_calculator('-1 year'))

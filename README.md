@@ -2,10 +2,40 @@
 <h1> ⚕️EHRAgent🤖 </h1>
 </div>
 
+### Introduction
+LLM (Large Language Model) has gained signficant popularity over the past years. It can capture semantics of text, memorize past conversations,  
+
+
+### Related Work
 This a reproduction of the code of the paper ["EHRAgent: Code Empowers Large Language Models for Complex Tabular Reasoning on Electronic Health Records"](https://arxiv.org/abs/2401.07128). EHRAgent is an LLM agent empowered with a code interface, to autonomously generate and execute code for complex clinical tasks within electronic health records (EHRs). The original project page is available at [this link](https://wshi83.github.io/EHR-Agent-page/).
 
-### Features
+@article{shi2024ehragent,
+  title={Ehragent: Code empowers large language models for complex tabular reasoning on electronic health records},
+  author={Shi, Wenqi and Xu, Ran and Zhuang, Yuchen and Yu, Yue and Zhang, Jieyu and Wu, Hang and Zhu, Yuanda and Ho, Joyce and Yang, Carl and Wang, May D},
+  journal={EMNLP},
+  year={2024}
+}
 
+Text to SQL generation is another related project that the former utilizes its evelation logic with slight modification. Information of the project can be found at [this link](https://github.com/wangpinggl/TREQS/blob/master/README.md)
+
+@inproceedings{wang2020text,
+  title={Text-to-SQL Generation for Question Answering on Electronic Medical Records},
+  author={Wang, Ping and Shi, Tian and Reddy, Chandan K},
+  booktitle={Proceedings of The Web Conference 2020},
+  pages={350--361},
+  year={2020}
+}
+
+### Methodology
+
+### Result 
+
+### Conclusion 
+
+#### Future Considerations
+https://microsoft.github.io/autogen/0.2/docs/tutorial/code-executors/
+
+#### Features
 - EHRAgent is an LLM agent augmented with tools and medical knowledge, to solve complex tabular reasoning derived from EHRs;
 - Planning with a code interface, EHRAgent enables the LLM agent to formulate a clinical problem-solving process as an executable code plan of action sequences, along with a code executor;
 - We introduce interactive coding between the LLM agent and code executor, iteratively refining plan generation and optimizing code execution by examining environment feedback in depth.

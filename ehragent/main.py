@@ -58,6 +58,7 @@ def main():
     parser.add_argument("--data_path", type=str, default="<YOUR_DATASET_PATH>")
     parser.add_argument("--logs_path", type=str, default="<YOUR_LOGS_PATH>")
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--reverse_sequence", action="store_true")
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--debug_id", type=str, default="")
     parser.add_argument("--start_id", type=int, default=0)
@@ -137,13 +138,32 @@ def main():
         code = item.split('\nSolution:')[-1]
         new_item = {"question": question, "knowledge": knowledge, "code": code}
         long_term_memory.append(new_item)
+    if args.reverse_sequence:
+        start_sequence = args.num_questions - 1
+        end_sequence = args.start_id
+        increment = -1
+    else:
+        start_sequence = args.start_id
+        end_sequence = args.num_questions
+        increment = 1
 
     cnt_completion, cnt_judge, cnt_total = 0, 0, 0
-    for i in range(args.start_id, args.num_questions):
+    for i in range(start_sequence, end_sequence, increment):
         if not args.debug_id is None and len(args.debug_id) > 0 and contents[i]['id'] != args.debug_id:
+            continue
+        if contents[i]['id'] in ['5f9ee75b40aa7b05578e576c', 'bf1fb18f8c33093f41af877d', 
+                                 '1f739d651d3e475012d6dd7c', 'c05df0b81e03432ce9a0d68f',
+                                 'd733bf0081e4f4424205bf51', '9b548026218e4baffd6d0c4c',
+                                 '2cb4e7220cc9a842fd4a686d']:
+            print(f"===== skipping {contents[i]['id']} due to past issues.")
+            continue
+        file_directory = file_path.format(id=contents[i]['id'])
+        if os.path.isfile(file_directory):
+            print(f"===== {file_directory} was processed last time, skipping.")
             continue
         question = contents[i]['template']
         answer = contents[i]['answer']
+        print(f"===== Execution begins for id - {contents[i]['id']}")
         try:
             user_proxy.update_memory(args.num_shots, long_term_memory)
             user_proxy.initiate_chat(
@@ -169,7 +189,6 @@ def main():
             logs_string = [str(e)]
         if args.debug:
             print(logs_string)
-        file_directory = file_path.format(id=contents[i]['id'])
         # f = open(file_directory, 'w')
         if type(answer) == list:
             answer = ', '.join(answer)
@@ -198,7 +217,8 @@ def main():
         cnt_total += 1
     end_time = time.time()
     print("Time elapsed: ", end_time - start_time)
-    print(f"SR: {cnt_judge/cnt_total*100.0}\t CR: {cnt_completion/cnt_total*100.0}")
+    print(f"SR: {cnt_judge/cnt_total*100.0 if cnt_judge > 0 else 0}\t CR: {cnt_completion/cnt_total*100.0 if cnt_total > 0 else 0}")
+    print(f'total number of questions: {args.num_questions}')
 
 if __name__ == "__main__":
     main()
