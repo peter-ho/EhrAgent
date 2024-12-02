@@ -67,6 +67,8 @@ def main():
     set_seed(args.seed)
     if args.dataset == 'mimic_iii':
         from prompts_mimic import EHRAgent_4Shots_Knowledge
+    elif args.dataset == 'mimic_maria':
+        from prompts_mimic_maria import EHRAgent_4Shots_Knowledge
     else:
         from prompts_eicu import EHRAgent_4Shots_Knowledge
 
@@ -147,14 +149,21 @@ def main():
         end_sequence = args.num_questions
         increment = 1
 
+    ids_to_skip1 = ['d733bf0081e4f4424205bf51'
+        # '5f9ee75b40aa7b05578e576c', 'bf1fb18f8c33093f41af877d', 
+        #                         '1f739d651d3e475012d6dd7c', 'c05df0b81e03432ce9a0d68f',
+        #                         , '9b548026218e4baffd6d0c4c',
+        #                         '2cb4e7220cc9a842fd4a686d', 
+        #                         #'9ebb076ae2b7f49bcd138b84', '77e9256040d0519b2e8ed610']:
+        ]
+
+    ids_to_skip = ['5717a739649ee336aab058b0', '521bab0d0bd6cd7da2a2a661', '259f31d3d284515e3b821f84',
+                   '506c2d1276c5ea6dd7370a7f']
     cnt_completion, cnt_judge, cnt_total = 0, 0, 0
     for i in range(start_sequence, end_sequence, increment):
         if not args.debug_id is None and len(args.debug_id) > 0 and contents[i]['id'] != args.debug_id:
             continue
-        if contents[i]['id'] in ['5f9ee75b40aa7b05578e576c', 'bf1fb18f8c33093f41af877d', 
-                                 '1f739d651d3e475012d6dd7c', 'c05df0b81e03432ce9a0d68f',
-                                 'd733bf0081e4f4424205bf51', '9b548026218e4baffd6d0c4c',
-                                 '2cb4e7220cc9a842fd4a686d']:
+        if contents[i]['id'] in ids_to_skip:
             print(f"===== skipping {contents[i]['id']} due to past issues.")
             continue
         file_directory = file_path.format(id=contents[i]['id'])

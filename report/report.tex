@@ -123,63 +123,116 @@
 \maketitle
 
 \section{Introduction}
-ACM's consolidated article template, introduced in 2017, provides a
-consistent \LaTeX\ style for use across ACM publications, and
-incorporates accessibility and metadata-extraction functionality
-necessary for future Digital Library endeavors. Numerous ACM and
-SIG-specific \LaTeX\ templates have been examined, and their unique
-features incorporated into this single new template.
+According to \url{https://www.thebalancemoney.com/causes-of-rising-healthcare-costs-4064878}, 
+cost of healthcare has significantly increased over past decades and years, which can be a 
+risk for health and well being of Americans impacting every age group. I believe there 
+are many factors with many different solutions. One of the many is leveraging technology 
+to help medical professionals to focus their time and energy on patients and/or research 
+but not simple data retrieval or analysis.
 
-If you are new to publishing with ACM, this document is a valuable
-guide to the process of preparing your work for publication. If you
-have published with ACM before, this document provides insight and
-instruction into more recent changes to the article template.
+LLM (Large Language Model) has gained signficant popularity over the past years. It can 
+capture semantics of text, memorize past conversations,  
 
-The ``\verb|acmart|'' document class can be used to prepare articles
-for any ACM publication --- conference or journal, and for any stage
-of publication, from review to final ``camera-ready'' copy, to the
-author's own version, with {\itshape very} few changes to the source.
+\section{Related Work}
+This a reproduction and alternation of part of the work - ["EHRAgent: Code Empowers Large Language Models 
+for Complex Tabular Reasoning on Electronic Health Records"]\url{https://arxiv.org/abs/2401.07128}. 
+EHRAgent is an LLM agent empowered with a code interface, to autonomously generate and 
+execute code for complex clinical tasks within electronic health records (EHRs). 
+The original project page is available at [this link](https://wshi83.github.io/EHR-Agent-page/).
 
-\section{Template Overview}
-As noted in the introduction, the ``\verb|acmart|'' document class can
-be used to prepare many different kinds of documentation --- a
-double-anonymous initial submission of a full-length technical paper, a
-two-page SIGGRAPH Emerging Technologies abstract, a ``camera-ready''
-journal article, a SIGCHI Extended Abstract, and more --- all by
-selecting the appropriate {\itshape template style} and {\itshape
-  template parameters}.
+@article{shi2024ehragent,
+  title={Ehragent: Code empowers large language models for complex tabular reasoning on electronic health records},
+  author={Shi, Wenqi and Xu, Ran and Zhuang, Yuchen and Yu, Yue and Zhang, Jieyu and Wu, Hang and Zhu, Yuanda and Ho, Joyce and Yang, Carl and Wang, May D},
+  journal={EMNLP},
+  year={2024}
+}
 
-This document will explain the major features of the document
-class. For further information, the {\itshape \LaTeX\ User's Guide} is
-available from
-\url{https://www.acm.org/publications/proceedings-template}.
+Text to SQL generation is another related project that the former utilizes its evelation logic 
+with slight modification. Information of the project can be found at
+\url{https://github.com/wangpinggl/TREQS/blob/master/README.md}
 
-\subsection{Template Styles}
+@inproceedings{wang2020text,
+  title={Text-to-SQL Generation for Question Answering on Electronic Medical Records},
+  author={Wang, Ping and Shi, Tian and Reddy, Chandan K},
+  booktitle={Proceedings of The Web Conference 2020},
+  pages={350--361},
+  year={2020}
+}
 
-The primary parameter given to the ``\verb|acmart|'' document class is
-the {\itshape template style} which corresponds to the kind of publication
-or SIG publishing the work. This parameter is enclosed in square
-brackets and is a part of the {\verb|documentclass|} command:
-\begin{verbatim}
-  \documentclass[STYLE]{acmart}
-\end{verbatim}
+\section{Methodology}
 
-Journals use one of three template styles. All but three ACM journals
-use the {\verb|acmsmall|} template style:
-\begin{itemize}
-\item {\texttt{acmsmall}}: The default journal template style.
-\item {\texttt{acmlarge}}: Used by JOCCH and TAP.
-\item {\texttt{acmtog}}: Used by TOG.
-\end{itemize}
+\subsection{EHR Agent Execution Flow} 
+\begin{figure}[h] 
+  \centering
+  \includegraphics[width=\textwidth]{ehragent.png}
+  \caption{EHR Agent execution flow}
+  \Description{This diagram illustrates execution flow of EHR Agent 
+  describing each step from initializing memory, 
+  to get question for processing, to having various 
+  chatbots to answer the question}
+  \label{fig:ehragent}
+\end{figure}
 
-The majority of conference proceedings documentation will use the {\verb|acmconf|} template style.
-\begin{itemize}
-\item {\texttt{sigconf}}: The default proceedings template style.
-\item{\texttt{sigchi}}: Used for SIGCHI conference articles.
-\item{\texttt{sigplan}}: Used for SIGPLAN conference articles.
-\end{itemize}
+\subsection{Execution Steps}
+\begin{enumerate}
+  \setcounter{enumi}{0}
+  \item Predefined knowledge is intialized as memory, including question, knowledge, and associated solution.
+  \item A question from validation data set is passed into UserProxyAgent 
+  \item During initialization process of main code generation chat, UserProxyAgent sends question to Knowledge 
+  chatbot to retrieve knowledge regarding the question applying chain of thought. Few shot learning is also 
+  applied as the prompt to the knowledge chatbot includes examples of questions and their corresponding knowledge. 
+  \item Retrieve 4 most similar examples by comparing current question with questions in memory according to 
+  levenshtein distance, applying few shot learning.
+  \item Invoke code generation chatbot with table definition, function definition, knowledge retrieved from 
+  knowledge chatbot, examples from memory.
+  \item Execute code retrieved from bot and identify answer or errors. IF errors were encountered, 
+  capture errors and provide potential hints in resolving them.
+  \item When error was thrown in the last step, functions documentation, code executed and execution error 
+  are sent to debugger chatbot to identify potential fixes.
+  \item Original error message and suggestions returned by debugger chatbot are packaged as response back to 
+  code generation cahtbot for it to review and regenerate a better response. As chat with code generation 
+  chatbot continues until error occured related to exceeding max token size or termination message was identified.
+  \item The response is then compared with predefined answer, if the answer was correct, the question, knowledge 
+  and solution are all stored in memory for future reference.
+\end{enumerate}
 
-\subsection{Template Parameters}
+\subsection{Original functions provided for chatbot}
+\begin{enumerate}
+  \item{\texttt{Calculate}}: passes argument to wolfram alpha for mathematical calculation.
+  \item{\texttt{LoadDB}}: loads a MIMIC csv file into memory
+  \item{\texttt{FilterDB}}: filters data returned froom LoadDB with predefined common operators similar to SQL WHERE clause, 
+  but with a little more functionality including min and max, which selects the row equals to the minimum or maximum of the whole file. 
+  \item {\texttt{GetValue}}: retrieves a string based on a comma delimited list of column names 
+  provided in table definition, with some operator supported including sum.
+  \item {\texttt{SQLInterpreter}}: executes a given sql against sqlite3 database.
+  \item {\texttt{Calendar}}: evaluates the date after the duration of time based on sqlite database DATE\_ADD
+  function applied to CURRENT\_TIMESTAMP
+\end{enumerate}
+
+\subsection{Issues regarding original work}
+\begin{enumerate}
+  \item{\texttt{Cost}}: The table cost was referenced in multiple places of the original implementation including examples, 
+  validaton questons and answers, but in MIMIC-III v1.4, cost is not a file available for download, nor in the demo dataset. 
+  Any question related to cost can't be answered, and solution based on the example referring to cost would result in 
+  a table not found error, which can't be recovered.
+  \item{\texttt{Python Package dependency}}: In requirements.txt, autogen version 1.0.16 was referred, but 0.3.2 is the latest 
+  when this report was written. 0.3.3 was released afterwards, but it's still quite far from 1.0.16.
+  \item{\texttt{Sqlite3 calendar calculation}}: After setting up sqlite3 by importing MIMIC-III v1.4 csv files, 
+  sqlite3 database DATE\_ADD function doesn't use current date, but used 2000-01-01, so with input of -1 day, 
+  1999-12-31 was returned.
+  \item{\texttt{LoadDB requirement}}: Since LoadDB reads the whole table into memory, for larger table, 
+  out of memory exception was thrown. Due to re-reading the same csv or csv.gz files for every LoadDB command
+  for various questions, disk IO can cause unnecessary delays when reading against the same data.
+  \item{\texttt{Validation set issue}}: When trying to identify reasons for incorrect responses, SQL embedded in the validation
+  data set was used to identify and verify given answers. There are answers that are incorrect based on data retrieved from MIMIC-III v1.4. 
+  \item{\texttt{Execution challenge}}: Since some code generated by chatbot can be quite inefficient, there are times that it 
+  takes more than hours to run, and sometimes it can be hard to tell whether how long it will take for the process to terminate.   
+\end{enumerate}
+
+\subsection{Changes made corresponding to issues above}
+based on In the MIMIC-III database 24 questions and answers involved costs.
+
+Terminating the whole evaluation process was needed
 
 In addition to specifying the {\itshape template style} to be used in
 formatting your work, there are a number of {\itshape template parameters}
@@ -450,7 +503,7 @@ third-party material, you must clearly identify it as such, as shown
 in the example below.
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{sample-franklin}
+  \includegraphics[width=\linewidth]{ehragent.png}
   \caption{1907 Franklin Model D roadster. Photograph by Harris \&
     Ewing, Inc. [Public domain], via Wikimedia
     Commons. (\url{https://goo.gl/VLCRBB}).}

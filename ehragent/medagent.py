@@ -45,6 +45,8 @@ class MedAgent(UserProxyAgent):
         # import prompt
         if self.dataset == 'mimic_iii':
             from prompts_mimic import RetrKnowledge
+        elif self.dataset == 'mimic_maria':
+            from prompts_mimic_maria import RetrKnowledge
         else:
             from prompts_eicu import RetrKnowledge
         # Returns the related information to the given query.
@@ -102,6 +104,8 @@ class MedAgent(UserProxyAgent):
         # import prompt
         if self.dataset == 'mimic_iii':
             from prompts_mimic import EHRAgent_Message_Prompt
+        elif self.dataset == 'mimic_maria':
+            from prompts_mimic_maria import EHRAgent_Message_Prompt
         else:
             from prompts_eicu import EHRAgent_Message_Prompt
         self.question = context["message"]
@@ -144,6 +148,8 @@ class MedAgent(UserProxyAgent):
         # import prompt
         if self.dataset == 'mimic_iii':
             from prompts_mimic import CodeDebugger
+        elif self.dataset == 'mimic_maria':
+            from prompts_mimic_maria import CodeDebugger
         else:
             from prompts_eicu import CodeDebugger
         # Returns the related information to the given query.

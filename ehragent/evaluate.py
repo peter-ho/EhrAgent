@@ -1,7 +1,8 @@
 import os
 import json
 
-def judge(pred, ans):
+def judge(id, pred, ans):
+    pred0, ans0 = pred, ans
     old_flag = True
     if not ans in pred:
         old_flag = False
@@ -12,6 +13,10 @@ def judge(pred, ans):
     if ans == "False" or ans == "false":
         ans = "0"
     if ans == "True" or ans == "true":
+        ans = "1"
+    if ans == "No" or ans == "no":
+        ans = "0"
+    if ans == "Yes" or ans == "yes":
         ans = "1"
     if ans == "None" or ans == "none":
         ans = "0"
@@ -26,13 +31,17 @@ def judge(pred, ans):
         if not ans[i] in pred:
             new_flag = False
             break
-    return (old_flag or new_flag)
+    result = (old_flag or new_flag)
+    if not result:
+        print(f'JUDGING {id}, {ans0}')
+    return result
+    #return (old_flag or new_flag)
 
-logs_path = "<YOUR_LOGS_PATH>"
+logs_path = "C:\\src\\EhrAgent\\logs\\gpt-4-0613.gpt-4-0613\\4\\"
 files = os.listdir(logs_path)
 
 # read the files 
-answer_book = "<YOUR_DATASET_PATH>"
+answer_book = "C:\\src\\EhrAgent\\data\\valid_preprocessed_exclude_cost.json"
 with open(answer_book, 'r') as f:
     contents = json.load(f)
 answers = {}
@@ -42,13 +51,14 @@ for i in range(len(contents)):
 stats = {"total_num": 0, "correct": 0, "unfinished": 0, "incorrect": 0}
 
 for file in files:
-    if not file.split('.')[0] in answers.keys():
+    id = file.split('.')[0]
+    if not id in answers.keys():
         continue
     with open(logs_path+file, 'r') as f:
         logs = f.read()
     split_logs = logs.split('\n----------------------------------------------------------\n')
     question = split_logs[0]
-    answer = answers[file.split('.')[0]]
+    answer = answers[id]
     if type(answer) == list:
         answer = ', '.join(answer)
     stats["total_num"] += 1
@@ -64,7 +74,7 @@ for file in files:
         prediction_end = logs.rfind('TERMINATE')
         prediction = logs[last_code_end:prediction_end]
         logs = logs.split('TERMINATE')[0]
-        result = judge(prediction, answer)
+        result = judge(id, prediction, answer)
         if result:
             stats["correct"] += 1
         else:

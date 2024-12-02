@@ -12,7 +12,7 @@ def run_code(cell):
     Returns the path to the python interpreter.
     """
     # import prompts
-    from prompts_mimic import CodeHeader
+    from prompts_mimic_maria import CodeHeader
     try:
         global_var = {"answer": 0}
         exec(CodeHeader+cell, global_var)
