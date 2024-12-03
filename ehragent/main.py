@@ -157,8 +157,9 @@ def main():
         #                         #'9ebb076ae2b7f49bcd138b84', '77e9256040d0519b2e8ed610']:
         ]
 
-    ids_to_skip = ['5717a739649ee336aab058b0', '521bab0d0bd6cd7da2a2a661', '259f31d3d284515e3b821f84',
-                   '506c2d1276c5ea6dd7370a7f']
+    ids_to_skip = []
+    #['5717a739649ee336aab058b0', '521bab0d0bd6cd7da2a2a661', '259f31d3d284515e3b821f84',
+    #               '506c2d1276c5ea6dd7370a7f', '0291bf92bbb616c9f77cef9e']
     cnt_completion, cnt_judge, cnt_total = 0, 0, 0
     for i in range(start_sequence, end_sequence, increment):
         if not args.debug_id is None and len(args.debug_id) > 0 and contents[i]['id'] != args.debug_id:

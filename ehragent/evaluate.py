@@ -37,7 +37,8 @@ def judge(id, pred, ans):
     return result
     #return (old_flag or new_flag)
 
-logs_path = "C:\\src\\EhrAgent\\logs\\gpt-4-0613.gpt-4-0613\\4\\"
+logs_path = "C:\\src\\EhrAgent\\logs\\gpt-4-0613.gpt-4-0613\\4_baseline\\"
+#logs_path = "C:\\src\\EhrAgent\\logs_maria\\gpt-4-0613.gpt-4-0613\\4\\"
 files = os.listdir(logs_path)
 
 # read the files 
