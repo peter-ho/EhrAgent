@@ -1,21 +1,44 @@
 def openai_config(model):
-    if model == '<YOUR_OWN_GPT_MODEL_I>':
-        config = {
-            "model": "davinci-002",
-            "api_key": "<API_KEY>",
-            "base_url": "<BASE_URL>",
-            "api_version": "1",
-        }
-    elif model == 'gpt-35-turbo':
+    ## refer to configuration example: https://microsoft.github.io/autogen/0.2/docs/reference/oai/client#create
+    if model == 'gpt-35-turbo_azure':
         config = {
             "model": "gpt-35-turbo",
-            "api_key": "<API_KEY>",
-            "base_url": "<BASE_URL>",
+            "api_key": "<azure-key>",
+            "base_url": "https://ksind-m3ln7i5d-westeurope.openai.azure.com/",
             "api_version": "2024-08-01-preview",
+            "api_type": "azure",
+        }
+    elif model == 'gpt-35-turbo_autogen':
+        config = {
+            "model": "gpt-35-turbo",
+            "api_key": "<azure-key>",
+            "base_url": "https://ksind-m3ln7i5d-westeurope.openai.azure.com/openai/deployments/gpt-35-turbo",
+            "api_type": "AZURE"
+        }
+    elif model == 'health_ehragent':
+        config = {
+            "model": "gpt-4o-mini",
+            "api_key": "<azure-key>",
+            "api_type": "azure",
+            "base_url": "https://ai-peterho4772ai457264831480.openai.azure.com/",
+            "api_version": "2024-02-15-preview"
+        }
+    elif model == 'gpt-4-0613':
+        config = {
+            "model": "gpt-4",
+            "api_key": "<azure-key>",
+            "api_type": "azure",
+            "base_url": "https://peter-m3vi8tto-canadaeast.openai.azure.com/",
+            "api_version": "2024-08-01-preview"
         }
     else:
         config = {
-            "test": "openai/deployments/gpt-35-turbo/chat/completions"
+            "test": "openai/deployments/gpt-35-turbo/chat/completions",
+            "base_url": "https://ksind-m3ln7i5d-westeurope.openai.azure.com/openai/deployments/gpt-35-turbo",
+            "base_url": "https://ksind-m3ln7i5d-westeurope.openai.azure.com/",
+            "base_url": "https://ksind-m3ln7i5d-westeurope.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview",
+            "base_url": "https://ksind-m3ln7i5d-westeurope.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview",
+            "api_version": "2024-08-01-preview",
         }
     return config
 

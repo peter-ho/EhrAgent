@@ -1,8 +1,10 @@
-\documentclass[screen,review]{acmart}
+% \documentclass[screen,review]{acmart}
+\documentclass[acmsmall]{acmart}
 \usepackage{makecell} % Include the makecell package
+\usepackage{setspace}
 
+\providecommand\BibTeX{{%
 \AtBeginDocument{%
-  \providecommand\BibTeX{{%
     Bib\TeX}}}
 
 \setcopyright{acmlicensed}
@@ -129,20 +131,7 @@ with slight modification. Information of the project can be found at
   and solution are all stored in memory for future reference.
 \end{enumerate}
 
-\subsection{Original functions provided for chatbot}
-\begin{enumerate}
-  \item{\texttt{Calculate}}: passes argument to wolfram alpha for mathematical calculation.
-  \item{\texttt{LoadDB}}: loads a MIMIC csv file into memory
-  \item{\texttt{FilterDB}}: filters data returned froom LoadDB with predefined common operators similar to SQL WHERE clause, 
-  but with a little more functionality including min and max, which selects the row equals to the minimum or maximum of the whole file. 
-  \item {\texttt{GetValue}}: retrieves a string based on a comma delimited list of column names 
-  provided in table definition, with some operator supported including sum.
-  \item {\texttt{SQLInterpreter}}: executes a given sql against sqlite3 database.
-  \item {\texttt{Calendar}}: evaluates the date after the duration of time based on sqlite3 database
-  datetime function referencing current\_time
-\end{enumerate}
-
-\subsection{Issues regarding original work}
+\subsection{Issues Regarding Original Work}
 \begin{enumerate}
   \item{\texttt{Cost}}: The table cost was referenced in multiple places of the original implementation including examples, 
   validaton questons and answers, but in MIMIC-III v1.4, cost is not a file available for download, nor in the demo dataset. 
@@ -181,25 +170,24 @@ with slight modification. Information of the project can be found at
   \item{\texttt{New functions}}: Given database operations aren't as straightforward to be mapped with 
   results returning multiple values or list when only one value is needed, new functions are added 
   including GetValue getting a single, GetValues getting multiple values, 
-  GetCount count the number of rows of a data set.
+  GetCount counting the number of rows of a data set.
 \end{enumerate}
 
 %%Result - Outline your major results. Tell your readers about the impact or usefulness of what you discovered.
 \section{Result}
 \begin{table}[H]
   \centering
-  \caption{Execution result}
+  \caption{Execution Result}
   \label{tab:result}
-  \centering
   \begin{tabular}{|c|c|c|c|}
       \hline
-       & \makecell{\textbf{Number of} \\ \textbf{Question}} & \makecell{\textbf{Success} \\ \textbf{Rate}} & \makecell{\textbf{Completion} \\ \textbf{Rate}}  \\
+       & \makecell{\textbf{Number of} \textbf{Question}} & \makecell{\textbf{Success} \textbf{Rate}} & \makecell{\textbf{Completion} \textbf{Rate}}  \\
       \hline
-      \makecell{\textbf{EHRAgent} \\ from original \\ work\cite{shi2024ehragent} } & 581 & 53.10 & 91.72\\
+      \makecell{\textbf{EHRAgent} from original work\cite{shi2024ehragent} } & 581 & 53.10 & 91.72\\
       \hline
-      \makecell{\textbf{EHRAgent} \\ \textbf{w/o cost}} & 556 & 26.08 & 69.96\\ 
+      \makecell{\textbf{EHRAgent} \textbf{w/o cost}} & 556 & 26.08 & 69.96\\ 
       \hline
-      \makecell{\textbf{EHRAgent with} \\ \textbf{MariaDB w/o cost}} & 556 & 26.08 & 69.96\\
+      \makecell{\textbf{EHRAgent with} \textbf{MariaDB w/o cost}} & 556 & 26.08 & 69.96\\
       \hline
   \end{tabular}
 \end{table}
@@ -209,7 +197,7 @@ data set used in this report. With the result being comparable between EHRAgent 
 has not improved even though some new functions are provided. But the amount of time it took to finish processing the full set of 
 questions has improved quite a bit. Due to the process being randomly crashed and processing of some questions were killed inconsistently
 , duration of processing was not accurately captured. But the amount of time it took to finish without MiraDB was signiificantly larger
-than the processing with MiraDB. 
+than the processing with MariaDB. 
 
 \section{Conclusion}
 %%Conclusion - Summarize your project. Then, point out the future directions or things can be improved or expanded upon in the future.
